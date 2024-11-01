@@ -1,33 +1,32 @@
-
 import org.junit.jupiter.api.Test;
-
 
 import static io.restassured.RestAssured.given;
 import static io.restassured.http.ContentType.JSON;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.is;
 
-public class ReqresTests {
+public class ReqresTests extends TestBase {
 
-@Test
-    void checkSingleResource() {
+    @Test
+    void checkSingleResourceTest() {
 
-         given()
-            .log().uri()
-            .get("https://reqres.in/api/unknown/2")
-
-         .then()
-            .log().body()
-            .body("data.pantone_value", is("17-2031"));
-}
-
-@Test
-    void successfulCheckListResource() {
-
-         given()
+        given()
                 .log().uri()
-                .get("https://reqres.in/api/unknown")
+                .get("/unknown/2")
 
-         .then()
+                .then()
+                .log().body()
+                .body("data.pantone_value", is("17-2031"));
+    }
+
+    @Test
+    void successfulCheckListResourceTest() {
+
+        given()
+                .log().uri()
+                .get("/unknown")
+
+                .then()
                 .log().body()
                 .assertThat()
                 .body("data.id", hasItems(3, 4, 5))
@@ -38,43 +37,21 @@ public class ReqresTests {
     }
 
     @Test
-    void unsuccessfulCheckListResource() {
+    void unsuccessfulCheckListResourceTest() {
 
         given()
                 .log().uri()
-                .get("https://reqres.in/api/unknown")
+                .get("/unknown")
 
-        .then()
-                .log().status()
-                .log().body()
+                .then()
+                .log().all()
                 .statusCode(200)
                 .assertThat()
                 .body("data.id", hasItems(10));
     }
 
-@Test
-    void successfulCheckCreateUser() {
-
-    String data = "{\"name\": \"morpheus\", \"job\": \"leader\"}";
-
-        given()
-            .body(data)
-            .contentType(JSON)
-            .log().uri()
-
-        .when()
-            .post("https://reqres.in/api/users")
-
-        .then()
-            .log().status()
-            .log().body()
-            .statusCode(201)
-            .body("name", is("morpheus"))
-            .body("job", is("leader"));
-}
-
     @Test
-    void unsuccessfulCheckCreateUser() {
+    void successfulCheckCreateUserTest() {
 
         String data = "{\"name\": \"morpheus\", \"job\": \"leader\"}";
 
@@ -83,26 +60,44 @@ public class ReqresTests {
                 .contentType(JSON)
                 .log().uri()
 
-        .when()
-                .post("https://reqres.in/api/users")
+                .when()
+                .post("/users")
 
-        .then()
-                .log().status()
-                .log().body()
+                .then()
+                .log().all()
+                .statusCode(201)
+                .body("name", is("morpheus"))
+                .body("job", is("leader"));
+    }
+
+    @Test
+    void unsuccessfulCheckCreateUserTest() {
+
+        String data = "{\"name\": \"morpheus\", \"job\": \"leader\"}";
+
+        given()
+                .body(data)
+                .contentType(JSON)
+                .log().uri()
+
+                .when()
+                .post("/users")
+
+                .then()
+                .log().all()
                 .statusCode(201)
                 .body("name", is("morpheus"))
                 .body("job", is("nothing"));
     }
 
     @Test
-    void checkDeleteUser() {
+    void checkDeleteUserTest() {
 
-         given()
+        given()
                 .log().uri()
-                .delete("https://reqres.in/api/users/2")
-         .then()
-                .log().body()
-                .log().status()
+                .delete("/users/2")
+                .then()
+                .log().all()
                 .statusCode(204);
     }
 }
